@@ -1,0 +1,108 @@
+/**
+ * Copyright (C) 2022-2023 Advanced Micro Devices, Inc. - All rights reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You may
+ * not use this file except in compliance with the License. A copy of the
+ * License is located at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+#ifndef AIE_TRACE_DOT_H
+#define AIE_TRACE_DOT_H
+
+#include <cstdint>
+
+#include "xdp/profile/plugin/aie_trace/aie_trace_impl.h"
+#include "xaiefal/xaiefal.hpp"
+
+namespace xdp {
+
+  class AieTrace_EdgeImpl : public AieTraceImpl{
+    public:
+      XDP_EXPORT
+      AieTrace_EdgeImpl(VPDatabase* database, std::shared_ptr<AieTraceMetadata> metadata);
+        // : AieTraceImpl(database, metadata);
+      ~AieTrace_EdgeImpl() = default;
+      
+      XDP_EXPORT
+      virtual void updateDevice();
+      XDP_EXPORT
+      virtual void flushAieTileTraceModule();
+
+    private: 
+      typedef XAie_Events            EventType;
+      typedef std::vector<EventType> EventVector;
+      typedef std::vector<uint32_t>  ValueVector;
+
+      module_type getTileType(uint16_t row);
+      void configEventSelections(XAie_DevInst* aieDevInst,
+                                 const XAie_LocType loc,
+                                 const XAie_ModuleType mod,
+                                 const module_type type,
+                                 const std::string metricSet,
+                                 const uint8_t channel0,
+                                 const uint8_t channel);
+      bool setMetricsSettings(uint64_t deviceId, 
+                      void* handle);
+      void releaseCurrentTileCounters(int numCoreCounters, 
+                                      int numMemoryCounters);
+      bool tileHasFreeRsc(xaiefal::XAieDev* aieDevice, 
+                          XAie_LocType& loc, 
+                          const module_type type,
+                          const std::string& metricSet);
+      void printTileStats(xaiefal::XAieDev* aieDevice, 
+                          const tile_type& tile);
+      bool configureStartIteration(xaiefal::XAieMod& core);
+      bool configureStartDelay(xaiefal::XAieMod& core);
+     
+      bool checkAieDeviceAndRuntimeMetrics(uint64_t deviceId, void* handle);
+      void setTraceStartControl(void* handle);
+      uint64_t checkTraceBufSize(uint64_t size);
+      inline uint32_t bcIdToEvent(int bcId);
+
+    private:
+      XAie_DevInst*     aieDevInst = nullptr;
+      xaiefal::XAieDev* aieDevice  = nullptr;
+
+      std::set<std::string> metricSets;
+      std::map<std::string, EventVector> mCoreEventSets;
+      std::map<std::string, EventVector> mMemoryEventSets;
+      std::map<std::string, EventVector> mMemTileEventSets;
+
+      // AIE profile counters
+      std::vector<tile_type> mCoreCounterTiles;
+      std::vector<std::shared_ptr<xaiefal::XAiePerfCounter>> mCoreCounters;
+      std::vector<std::shared_ptr<xaiefal::XAiePerfCounter>> mMemoryCounters;
+
+      // Counter metrics (same for all sets)
+      EventType   mCoreTraceStartEvent;
+      EventType   mCoreTraceEndEvent;
+      EventType   mMemTileTraceStartEvent;
+      EventType   mMemTileTraceEndEvent;
+      EventType   mTraceFlushEndEvent;
+      EventType   mMemTileTraceFlushEndEvent;
+
+      EventVector mCoreCounterStartEvents;
+      EventVector mCoreCounterEndEvents;
+      ValueVector mCoreCounterEventValues;
+
+      EventVector mMemoryCounterStartEvents;
+      EventVector mMemoryCounterEndEvents;
+      ValueVector mMemoryCounterEventValues;
+
+      // Tile locations to apply trace end and flush
+      std::vector<XAie_LocType> mTraceFlushLocs;
+      std::vector<XAie_LocType> mMemTileTraceFlushLocs;
+  };
+
+}   
+
+#endif
