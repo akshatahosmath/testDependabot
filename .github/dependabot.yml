@@ -5,11 +5,11 @@
 
 version: 2
 updates:
-  - package-ecosystem: gitsubmodule
+  - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
       interval: daily
-      time: "1:12"
-    open-pull-requests: 5
+      time: "1:16"
+    open-pull-requests: 10
     commit-message:
       prefix: "auto-pr"
