@@ -10,8 +10,8 @@ updates:
     schedule:
       interval: daily
       time: "5:40"
-      allow:
-        - dependency-name: "inside"
+      #allow:
+        #- dependency-name: "inside"
     open-pull-requests: 10
     labels:
       - "dependencies"
