@@ -13,5 +13,7 @@ updates:
       allow:
         - dependency-name: "inside"
     open-pull-requests: 10
+    labels:
+      - "dependencies"
     commit-message:
       prefix: "auto-pr"
