@@ -9,7 +9,7 @@ updates:
     directory: "/"
     schedule:
       interval: daily
-      time: "1:30"
+      time: "1:38"
       allow:
         - dependency-name: "inside"
     open-pull-requests: 10
