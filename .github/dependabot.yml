@@ -10,6 +10,8 @@ updates:
     schedule:
       interval: daily
       time: "1:16"
+      allow:
+        - dependency-name: "inside"
     open-pull-requests: 10
     commit-message:
       prefix: "auto-pr"
